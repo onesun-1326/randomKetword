@@ -10,13 +10,17 @@ def load():  #데이터 불러오기 함수 정의.
     try:  #예외 처리 시작.
         with open("memo.json", "r", encoding="utf-8") as f:  #memo.json 파일을 읽기 모드로 열기.
             return json.load(f)  #파일에서 JSON 데이터를 읽어와 리스트로 반환.
-    except FileNotFoundError:  #파일이 없을 경우 예외 처리.
+    except (FileNotFoundError, json.JSONDecodeError):  #파일이 없거나 JSON 형식이 잘못되었을 경우 예외 처리.
         return []  #빈 리스트 반환.
     
 data= load() #데이터 불러오기 함수 호출하여 data 변수에 저장.
 
+
 def add_keyword(data):  #키워드 추가 함수 정의.
-    keyWord = input("키워드를 적어주세요")  #키워드 입력.
+    keyWord = input("키워드를 적어주세요: ").strip()  #키워드 입력.
+    if(keyWord == ""):  #만약 키워드가 비어있으면
+        print("키워드를 입력해주세요.")  #메시지 출력.
+        return  #함수 종료.
     dateTime = str(datetime.date.today())  #현재 날짜를 문자열로 변환.
     dict1 = {'word': keyWord, 'added': dateTime, 'removed': None}  #키워드와 날짜를 딕셔너리로 저장.
     data.append(dict1)  #리스트에 딕셔너리 추가.   
@@ -29,7 +33,11 @@ def show_keywords(data):  #키워드 출력 함수 정의.
 def remove_keyword(data):  #키워드 제거 함수 정의.
     show_keywords(data)  #키워드 출력 함수 호출.
     active_idx = get_active_indexes(data)  #활성화된 키워드의 인덱스를 가져옴.
-    choice_idx = int(input("제거할 키워드 번호를 선택하세요.")) - 1  #사용자에게 제거할 키워드 번호 입력 받음.
+    try:  #예외 처리 시작.
+        choice_idx = int(input("제거할 키워드 번호를 선택하세요.")) - 1  #사용자에게 제거할 키워드 번호 입력 받음.
+    except ValueError:
+        print("잘못된 입력입니다.")  #숫자가 아닌 값을 입력했을 경우 메시지 출력.
+        return
     if (0 <= choice_idx < len(active_idx)):  #입력한 번호가 활성화된 키워드의 범위 내에 있는지 확인.
         real_idx = active_idx[choice_idx]  #실제 인덱스를 가져옴.
         data[real_idx]['removed'] = str(datetime.date.today())  #제거 날짜를 현재 날짜로 설정.
